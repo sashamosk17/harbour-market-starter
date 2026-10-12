@@ -63,7 +63,7 @@ export function describe(error) {
   if (error instanceof HttpError) {
     if (error.status === 404) return "not found";
     if (error.status >= 500) return `the server answered ${error.status}`;
-    return `the server answered ${error.status}`;
+    return `the server answered ${error.status}`; 
   }
 
   if (error.name === "AbortError") {

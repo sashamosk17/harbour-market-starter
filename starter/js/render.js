@@ -1,5 +1,5 @@
-import { stalls } from "./data.js";
 import { state, visibleStalls } from "./state.js";
+import { describe } from "./api.js";
 
 const template = document.querySelector("#stall-template");
 const list = document.querySelector(".vendor-list");
@@ -7,6 +7,10 @@ const filters = document.querySelector(".filters"); // module scope: main.js has
 const count = document.querySelector(".filter-count");
 const savedCount = document.querySelector(".saved-count");
 const search = document.querySelector("#vendor-search");
+const status = document.querySelector(".load-status");
+const errorBox = document.querySelector(".load-error");
+const errorMessage = errorBox.querySelector(".error-message");
+const retry = errorBox.querySelector(".retry");
 
 // Data in, element out
 function card(stall) {
@@ -22,6 +26,12 @@ function card(stall) {
   li.querySelector("h3").textContent = stall.name;
   li.querySelector(".blurb").textContent = stall.blurb;
   li.querySelector(".price").textContent = stall.price === 0 ? "free" : `from €${stall.price}`;
+  const rating = li.querySelector(".rating");
+  if (stall.rating != null && stall.reviewCount > 0) {
+    rating.textContent = `★ ${stall.rating} · ${stall.reviewCount} review${stall.reviewCount === 1 ? "" : "s"}`;
+  } else {
+    rating.textContent = "no reviews yet";
+  }
   li.querySelector(".badge").hidden = !stall.soldOut;
 
   const isSaved = state.saved.has(stall.id);
@@ -36,7 +46,16 @@ function card(stall) {
 export function render() {
   const visible = visibleStalls();
 
-  if (visible.length) {
+  list.setAttribute("aria-busy", String(state.status === "loading"));
+
+  if (state.status === "loading") {
+    const loading = document.createElement("li");
+    loading.className = "empty";
+    loading.textContent = "Loading the vendors…";
+    list.replaceChildren(loading);
+  } else if (state.status === "error") {
+    list.replaceChildren();
+  } else if (visible.length) {
     list.replaceChildren(...visible.map(card));
   } else {
     const empty = document.createElement("li");
@@ -48,8 +67,19 @@ export function render() {
   for (const button of filters.querySelectorAll("button")) {
     button.setAttribute("aria-pressed", String(button.dataset.filter === state.tag));
   }
-  count.textContent = visible.length === stalls.length ? "" : `${visible.length} of ${stalls.length} stalls`;
+  const total = state.stalls.length;
+  count.textContent = visible.length === total ? "" : `${visible.length} of ${total} stalls`;
   savedCount.textContent = state.saved.size ? `♥ ${state.saved.size} saved` : "";
+  status.textContent = state.status === "loading"
+    ? "Loading the vendors…"
+    : state.status === "error"
+      ? "The vendors could not be loaded."
+      : `${total} stalls`;
+
+  const hasError = state.status === "error";
+  errorBox.hidden = !hasError;
+  errorMessage.textContent = hasError ? `Could not load the vendors: ${describe(state.error)}.` : "";
+  retry.hidden = !hasError;
 
   // Controls are part of the page too: draw them from state
   // (only when different: rewriting the box you're typing in can move the cursor)

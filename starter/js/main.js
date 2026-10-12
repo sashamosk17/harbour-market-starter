@@ -4,9 +4,12 @@ import { save, load } from "./storage.js";
 import { render } from "./render.js";
 import { setupMenu } from "./menu.js";
 import { setupTickets } from "./tickets.js";
+import { getJSON } from "./api.js";
 
 const filters = document.querySelector(".filters");
 const list = document.querySelector(".vendor-list");
+const status = document.querySelector(".load-status");
+const retry = document.querySelector(".retry");
 
 // Every change goes through here: draw, then remember
 function update() {
@@ -34,7 +37,28 @@ list.addEventListener("click", (event) => {
   update();
 });
 
+export async function loadStalls() {
+  state.status = "loading";
+  state.error = null;
+  render();
+
+  try {
+    state.stalls = await getJSON("/stalls");
+    state.status = "ready";
+  } catch (error) {
+    state.error = error;
+    state.status = "error";
+  }
+
+  render();
+}
+
+retry.addEventListener("click", () => {
+  status.focus();
+  loadStalls();
+});
+
 setupMenu();
 setupTickets();
 load();
-render();
+await loadStalls();
