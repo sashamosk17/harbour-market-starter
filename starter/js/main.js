@@ -1,10 +1,11 @@
 // The only file the HTML loads. It wires events to state and starts the page.
-import { state, toggleSaved } from "./state.js";
+import { state } from "./state.js";
 import { save, load } from "./storage.js";
 import { render } from "./render.js";
 import { setupMenu } from "./menu.js";
 import { setupTickets } from "./tickets.js";
 import { getJSON } from "./api.js";
+import { loadSaved, toggleSavedOnServer } from "./saved.js";
 
 const filters = document.querySelector(".filters");
 const list = document.querySelector(".vendor-list");
@@ -33,8 +34,7 @@ document.querySelector("#vendor-search").addEventListener("input", (event) => {
 list.addEventListener("click", (event) => {
   const button = event.target.closest(".save");
   if (!button) return;
-  toggleSaved(button.closest(".stall").dataset.id);
-  update();
+  toggleSavedOnServer(button.closest(".stall").dataset.id);
 });
 
 export async function loadStalls() {
@@ -62,3 +62,9 @@ setupMenu();
 setupTickets();
 load();
 await loadStalls();
+try {
+  await loadSaved();
+} catch (error) {
+  state.savedAvailable = false;
+  render();
+}

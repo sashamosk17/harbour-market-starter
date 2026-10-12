@@ -57,6 +57,8 @@ export async function request(method, path, data, options = {}) {
 
 export const getJSON = (path, options) => request("GET", path, undefined, options);
 export const postJSON = (path, data, options) => request("POST", path, data, options);
+export const putJSON = (path, data, options) => request("PUT", path, data, options);
+export const deleteJSON = (path, options) => request("DELETE", path, undefined, options);
 
 // A short sentence for people; the error itself goes to the console.
 export function describe(error) {

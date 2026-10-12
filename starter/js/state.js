@@ -7,6 +7,8 @@ export const state = {
   status: "loading",
   error: null,
   stalls: [],
+  savedAvailable: true,
+  pendingSaved: new Set(),
 };
 
 export function visibleStalls() {
@@ -14,9 +16,4 @@ export function visibleStalls() {
   return state.stalls
     .filter((stall) => state.tag === "all" || stall.tag === state.tag)
     .filter((stall) => stall.name.toLowerCase().includes(q));
-}
-
-export function toggleSaved(id) {
-  if (state.saved.has(id)) state.saved.delete(id);
-  else state.saved.add(id);
 }

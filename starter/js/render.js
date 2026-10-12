@@ -36,6 +36,10 @@ function card(stall) {
 
   const isSaved = state.saved.has(stall.id);
   const save = li.querySelector(".save");
+  const isPending = state.pendingSaved.has(stall.id);
+  save.classList.toggle("pending", isPending);
+  save.disabled = !state.savedAvailable;
+  save.setAttribute("aria-busy", String(isPending));
   save.setAttribute("aria-pressed", String(isSaved));
   save.setAttribute("aria-label", `Save ${stall.name}`);
   save.textContent = isSaved ? "♥" : "♡";
@@ -80,6 +84,11 @@ export function render() {
   errorBox.hidden = !hasError;
   errorMessage.textContent = hasError ? `Could not load the vendors: ${describe(state.error)}.` : "";
   retry.hidden = !hasError;
+  const saveMessage = document.querySelector(".save-status");
+  if (!state.savedAvailable) {
+    saveMessage.textContent = "Saved stalls are unavailable. Try again later.";
+    saveMessage.hidden = false;
+  }
 
   // Controls are part of the page too: draw them from state
   // (only when different: rewriting the box you're typing in can move the cursor)

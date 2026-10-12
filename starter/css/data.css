@@ -35,6 +35,7 @@
 .save:hover { border-color: var(--lantern); }
 .save:focus-visible { outline: 3px solid var(--sea); outline-offset: 2px; }
 .save[aria-pressed="true"] { background: var(--lantern); color: var(--night); border-color: var(--lantern); }
+.save.pending { opacity: 0.5; }
 
 .vendor-list .empty { grid-column: 1 / -1; color: var(--ink-2); font-style: italic; }
 
